@@ -1,4 +1,4 @@
-<template>
+<<template>
   <div class="container mt-5">
     <div :class="['card', 'shadow-sm', isDarkTheme ? 'bg-dark' : 'bg-light']">
       <div
@@ -8,7 +8,6 @@
           'text-white',
           'text-center',
         ]"
-        
       >
         <h2 class="mb-0">{{ types.TASK_LIST_TITLE }}</h2>
       </div>
@@ -312,6 +311,7 @@
   </div>
 </template>
 
+
 <script>
 import axios from 'axios'
 import { jsPDF } from 'jspdf'
@@ -348,6 +348,12 @@ export default {
     },
     totalPages() {
       return Math.ceil(this.books.length / this.booksPerPage)
+    },
+    totalBooks() {
+      return this.books.length
+    },
+    totalStock() {
+      return this.books.reduce((total, book) => total + book.stock, 0)
     },
   },
   created() {
@@ -435,6 +441,31 @@ export default {
     },
     generatePDF() {
       const doc = new jsPDF()
+      const pageWidth = doc.internal.pageSize.getWidth()
+      const title = 'INVENTARIO DE LIBRERIA EL POETA'
+      const date = new Date().toLocaleDateString()
+      const dateString = `Fecha de creación: ${date}`
+      const totalBooksString = `Total de libros: ${this.totalBooks}`
+      const totalStockString = `Total de stock: ${this.totalStock}`
+      
+      // Título centrado
+      doc.setFontSize(18)
+      const titleWidth = doc.getStringUnitWidth(title) * doc.internal.getFontSize() / doc.internal.scaleFactor
+      const titleOffset = (pageWidth - titleWidth) / 2
+      doc.text(title, titleOffset, 20)
+      
+      // Fecha en la esquina superior derecha, más abajo del título
+      doc.setFontSize(12)
+      const dateWidth = doc.getStringUnitWidth(dateString) * doc.internal.getFontSize() / doc.internal.scaleFactor
+      doc.text(dateString, pageWidth - dateWidth - 10, 30)
+      
+      // Total de libros y stock más abajo de la fecha
+      const totalBooksWidth = doc.getStringUnitWidth(totalBooksString) * doc.internal.getFontSize() / doc.internal.scaleFactor
+      doc.text(totalBooksString, pageWidth - totalBooksWidth - 10, 40)
+      
+      const totalStockWidth = doc.getStringUnitWidth(totalStockString) * doc.internal.getFontSize() / doc.internal.scaleFactor
+      doc.text(totalStockString, pageWidth - totalStockWidth - 10, 50)
+      
       const columns = [
         { header: this.types.ID_INCREMENTAL, dataKey: 'id' },
         { header: this.types.TITLE_LABEL, dataKey: 'title' },
@@ -448,12 +479,19 @@ export default {
           ? this.types.STATUS_COMPLETE
           : this.types.STATUS_NO_COMPLETE,
       }))
-      doc.autoTable(columns, rows)
+      doc.autoTable(columns, rows, { startY: 60 })
       doc.save('books.pdf')
     },
   },
 }
 </script>
+
+
+
+
+
+
+
 
 <style scoped>
 @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
