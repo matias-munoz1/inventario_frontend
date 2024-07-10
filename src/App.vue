@@ -10,7 +10,7 @@
         <div class="container-fluid">
           <router-link
             class="navbar-brand d-flex align-items-center ms-5"
-            to="/"
+            to="/Login"
           >
             <img src="@/assets/mainlogo.png" alt="Logo" class="me-2 logo" />
             <span>{{ types.NAME_APP }}</span>
@@ -38,8 +38,7 @@
               </li>
               <li class="nav-item me-3">
                 <router-link class="nav-link nav-item-hover" to="/TaskList">
-                  <i class="bi bi-house-door-fill"></i
-                  >{{ types.INVENTARIO_DE_LIBROS }}
+                  <i class="bi bi-book-fill"></i>{{ types.INVENTARIO_DE_LIBROS }}
                 </router-link>
               </li>
               <li class="nav-item">
@@ -65,8 +64,6 @@
       <router-view :is-dark-theme="isDarkTheme"></router-view>
     </div>
   </div>
-
-  <div></div>
 </template>
 
 <script>
@@ -88,12 +85,14 @@ export default {
 </script>
 
 <style>
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
 @import 'bootstrap/dist/css/bootstrap.min.css';
 @import 'bootstrap-icons/font/bootstrap-icons.css';
 
 /* Estilos generales */
 #app {
   min-height: 100vh;
+  font-family: 'Roboto', sans-serif;
 }
 
 header {
@@ -102,11 +101,11 @@ header {
 }
 
 .dark-header {
-  background-color: #3e2723;
+  background-color: #2d3e50;
 }
 
 .light-header {
-  background-color: #ffffff;
+  background-color: #f8f5f1;
 }
 
 .navbar-brand {
@@ -114,7 +113,7 @@ header {
   font-weight: bold;
   display: flex;
   align-items: center;
-  color: #fff;
+  color: #ffffff;
 }
 
 .navbar-brand span {
@@ -123,7 +122,7 @@ header {
 
 .nav-link {
   font-size: 1.1rem;
-  color: #fff !important;
+  color: #ffffff !important;
   display: flex;
   align-items: center;
 }
@@ -135,7 +134,7 @@ header {
 }
 
 .nav-item-hover:hover {
-  background-color: rgba(0, 170, 255, 0.2);
+  background-color: rgba(255, 255, 255, 0.2);
 }
 
 .navbar-toggler {
@@ -151,8 +150,8 @@ header {
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #fff;
-  border-color: #fff;
+  color: #ffffff;
+  border-color: #ffffff;
 }
 
 .theme-button {
@@ -170,86 +169,86 @@ header {
 }
 
 .dark-theme {
-  background-color: #2d1b15;
+  background-color: #2d3e50;
   color: #ffffff;
 }
 
 .dark-theme .navbar {
-  border-bottom: 1px solid #3e2723;
+  border-bottom: 1px solid #4e4e4e;
 }
 
 .dark-theme .card {
-  border: 1px solid #3e2723;
+  border: 1px solid #4e4e4e;
 }
 
 .dark-theme .card-header {
-  background-color: #3e2723;
+  background-color: #4e4e4e;
 }
 
 .dark-theme .card-body {
-  background-color: #2d1b15;
+  background-color: #2d3e50;
 }
 
 .dark-theme .table thead th {
-  background-color: #3e2723;
+  background-color: #4e4e4e;
   color: #ffffff;
 }
 
 .dark-theme .table tbody td {
-  background-color: #2d1b15;
+  background-color: #2d3e50;
   color: #ffffff;
 }
 
 .light-theme {
-  background-color: #f8f9fa;
-  color: #212529;
+  background-color: #f8f5f1;
+  color: #2d3e50;
 }
 
 .light-theme .navbar {
-  border-bottom: 1px solid #dee2e6;
+  border-bottom: 1px solid #2d3e50;
 }
 
 .light-theme .navbar-brand {
-  color: #212529;
+  color: #2d3e50;
 }
 
 .light-theme .navbar-brand span {
-  color: #212529;
+  color: #2d3e50;
 }
 
 .light-theme .nav-link {
-  color: #212529 !important;
+  color: #2d3e50 !important;
 }
 
 .light-theme .btn-outline-secondary {
-  color: #212529;
-  border-color: #212529;
+  color: #2d3e50;
+  border-color: #2d3e50;
 }
 
 .light-theme .btn-outline-secondary:hover {
-  background-color: rgba(33, 37, 41, 0.1);
+  background-color: rgba(45, 62, 80, 0.1);
 }
 
 .light-theme .card {
-  border: 1px solid #dee2e6;
+  border: 1px solid #2d3e50;
 }
 
 .light-theme .card-header {
-  background-color: #ffffff;
+  background-color: #f8f5f1;
 }
 
 .light-theme .card-body {
-  background-color: #f8f9fa;
+  background-color: #ffffff;
 }
 
 .light-theme .table thead th {
-  background-color: #e9ecef;
-  color: #212529;
+  background-color: #e0e0e0;
+  color: #2d3e50;
 }
 
 .light-theme .table tbody td {
   background-color: #ffffff;
-  color: #212529;
+  color: #2d3e50;
 }
 
 .table-striped tbody tr:nth-of-type(odd) {

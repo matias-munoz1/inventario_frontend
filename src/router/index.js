@@ -5,10 +5,12 @@ import EditTask from '../components/EditTask.vue'
 import LoginMainComponent from '../components/LoginMainComponent.vue'
 
 const routes = [
-  { path: '/', component: LoginMainComponent }, // Redirecciona solo al login
+  { path: '/Login', component: LoginMainComponent }, // Redirecciona solo al login
   { path: '/add', component: AddTask },
   { path: '/edit/:id', component: EditTask },
   { path: '/TaskList', component: TaskList }, // Necesito llegar a ese con un boton
+  { path: '/', component: LoginMainComponent },
+
 ]
 
 const router = createRouter({

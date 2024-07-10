@@ -2,16 +2,14 @@ const types = {
   NAME_APP: 'Libreria El Poeta',
   START: 'Inicio',
   TASK_LIST_TITLE: 'Lista de Libros',
-  SERVER_ERROR_MESSAGE:
-    'Hubo un problema con el servidor. Por favor, inténtalo más tarde o contacta a los desarrolladores.',
+  SERVER_ERROR_MESSAGE: 'Hubo un problema con el servidor. Por favor, inténtalo más tarde o contacta a los desarrolladores.',
   EDIT_MODAL_TITLE: 'Editar Libro',
   ADD_TASK: 'Agregar tarea',
   ADD_NEW_TASK: 'Agregar un nuevo Libro',
   ADD: 'Agregar',
   CONFIRMATION_MESSAGE: '¿Estás seguro de que deseas guardar los cambios?',
   CONFIRMATION_ADD_TASK: '¿Estás seguro de que deseas agregar esta tarea?',
-  DELETE_CONFIRMATION_MODAL_MESSAGE:
-    '¿Estás seguro de que deseas eliminar esta tarea?',
+  DELETE_CONFIRMATION_MODAL_MESSAGE: '¿Estás seguro de que deseas eliminar esta tarea?',
   SAVE_BUTTON: 'Guardar Cambios',
   TITLE_LABEL: 'Título',
   DESCRIPTION_LABEL: 'Descripción',
@@ -23,6 +21,7 @@ const types = {
   NEXT_PAGE_BUTTON: 'Siguiente',
   ID_INCREMENTAL: 'ID',
   STATUS_LABEL: 'Estado',
+  STOCK_LABEL: 'Stock',
   ACTIONS_LABEL: 'Acciones',
   EDIT_TASK: 'Editar',
   DELETE: 'Eliminar',
@@ -35,6 +34,7 @@ const types = {
   PLEASE_ENTER_TITLE: 'Por favor, ingresa un título.',
   PLEASE_ENTER_DESCRIPTION: 'Por favor, ingresa una descripción.',
   INVENTARIO_DE_LIBROS: 'Inventario de Libros',
-}
+  GENERATE_PDF: 'Generar Informe',
+};
 
-export default types
+export default types;

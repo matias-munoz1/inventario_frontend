@@ -17,6 +17,9 @@
     "bootstrap-icons": "^1.11.3",
     "core-js": "^3.8.3",
     "globals": "^15.6.0",
+    "jquery": "^3.7.1",
+    "jspdf": "^2.5.1",
+    "jspdf-autotable": "^3.8.2",
     "vue": "^3.2.13",
     "vue-axios": "^3.5.2"
   },

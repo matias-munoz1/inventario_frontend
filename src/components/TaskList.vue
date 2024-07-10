@@ -22,6 +22,9 @@
           {{ types.SERVER_ERROR_MESSAGE }}
         </div>
         <div v-else>
+          <button @click="generatePDF" class="btn btn-secondary mb-3">
+            {{ types.GENERATE_PDF }}
+          </button>
           <div class="table-responsive">
             <table
               :class="[
@@ -38,6 +41,7 @@
                   <th scope="col">{{ types.TITLE_LABEL }}</th>
                   <th scope="col">{{ types.DESCRIPTION_LABEL }}</th>
                   <th scope="col">{{ types.STATUS_LABEL }}</th>
+                  <th scope="col">{{ types.STOCK_LABEL }}</th>
                   <th scope="col">{{ types.ACTIONS_LABEL }}</th>
                 </tr>
               </thead>
@@ -60,16 +64,17 @@
                       }}
                     </span>
                   </td>
+                  <td>{{ task.stock }}</td>
                   <td>
                     <button
                       @click="editTask(task.id)"
-                      :class="['btn', 'btn-warning', 'btn-sm', 'me-2']"
+                      class="btn btn-warning btn-sm me-2"
                     >
                       <i class="bi bi-pencil-fill"></i> {{ types.EDIT_TASK }}
                     </button>
                     <button
                       @click="showDeleteConfirmationModal(task.id)"
-                      :class="['btn', 'btn-danger', 'btn-sm']"
+                      class="btn btn-danger btn-sm"
                     >
                       <i class="bi bi-trash-fill"></i> {{ types.DELETE }}
                     </button>
@@ -83,11 +88,8 @@
             class="d-flex justify-content-center"
           >
             <ul
-              :class="[
-                'pagination',
-                'pagination-md',
-                isDarkTheme ? 'pagination-dark' : 'pagination-light',
-              ]"
+              class="pagination pagination-md"
+              :class="isDarkTheme ? 'pagination-dark' : 'pagination-light'"
             >
               <li class="page-item" :class="{ disabled: currentPage === 1 }">
                 <a
@@ -178,6 +180,18 @@
                   v-model="editTaskData.description"
                   required
                 ></textarea>
+              </div>
+              <div class="mb-3">
+                <label for="editStock" class="form-label">{{
+                  types.STOCK_LABEL
+                }}</label>
+                <input
+                  type="number"
+                  class="form-control"
+                  id="editStock"
+                  v-model="editTaskData.stock"
+                  required
+                />
               </div>
               <div class="mb-3 form-check">
                 <input
@@ -301,6 +315,8 @@
 
 <script>
 import axios from 'axios'
+import { jsPDF } from 'jspdf'
+import 'jspdf-autotable'
 import { Modal } from 'bootstrap'
 import types from '../types.js'
 
@@ -318,6 +334,7 @@ export default {
         title: '',
         description: '',
         status: false,
+        stock: 0,
       },
       taskIdToDelete: null,
       currentPage: 1,
@@ -417,29 +434,66 @@ export default {
         console.error('Error deleting task:', error)
       }
     },
+    generatePDF() {
+      const doc = new jsPDF()
+      const columns = [
+        { header: this.types.ID_INCREMENTAL, dataKey: 'id' },
+        { header: this.types.TITLE_LABEL, dataKey: 'title' },
+        { header: this.types.DESCRIPTION_LABEL, dataKey: 'description' },
+        { header: this.types.STATUS_LABEL, dataKey: 'status' },
+        { header: this.types.STOCK_LABEL, dataKey: 'stock' },
+      ]
+      const rows = this.tasks.map((task) => ({
+        ...task,
+        status: task.status
+          ? this.types.STATUS_COMPLETE
+          : this.types.STATUS_NO_COMPLETE,
+      }))
+      doc.autoTable(columns, rows)
+      doc.save('tasks.pdf')
+    },
   },
 }
 </script>
 
 <style scoped>
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
+@import 'bootstrap/dist/css/bootstrap.min.css';
+@import 'bootstrap-icons/font/bootstrap-icons.css';
+
+/* Estilos generales */
+body {
+  font-family: 'Roboto', sans-serif;
+}
+
+.container {
+  max-width: 900px;
+}
+
+.card-header {
+  background-color: #007bff;
+  color: #ffffff;
+  text-align: center;
+}
+
 .table thead th {
   vertical-align: middle;
   text-align: center;
 }
+
 .table tbody td {
   vertical-align: middle;
   text-align: center;
 }
+
 .table-responsive {
   margin-bottom: 20px;
 }
-.card-header {
-  background-color: #8b4513; /* Marrón oscuro */
-  color: #ffffff; /* Texto blanco */
-}
+
 .pagination {
   margin-top: 20px;
 }
+
 .page-link {
   cursor: pointer;
   outline: none !important;
@@ -447,42 +501,44 @@ export default {
 
 .bg-dark .table-dark thead th,
 .bg-dark .table-dark tbody td {
-  background-color: #4e3629; /* Marrón más oscuro */
-  color: #ffffff; /* Texto blanco */
+  background-color: #343a40;
+  color: #ffffff;
 }
 
 .bg-dark .modal-content {
-  background-color: #3e2c21; /* Marrón aún más oscuro */
-  color: #ffffff; /* Texto blanco */
+  background-color: #343a40;
+  color: #ffffff;
 }
 
 .bg-light .table-light thead th,
 .bg-light .table-light tbody td {
-  background-color: #f5f5f5; /* Gris claro */
+  background-color: #f8f9fa;
 }
 
 .bg-light .modal-content {
-  background-color: #ffffff; /* Fondo blanco */
-  color: #000000; /* Texto negro */
+  background-color: #ffffff;
+  color: #000000;
 }
 
 .bg-dark .pagination-dark .page-item .page-link {
-  background-color: #6e4b36; /* Marrón medio */
-  color: #ffffff; /* Texto blanco */
+  background-color: #495057;
+  color: #ffffff;
 }
+
 .bg-dark .pagination-dark .page-item.active .page-link {
-  background-color: #8b4513; /* Marrón oscuro */
-  border-color: #8b4513; /* Borde marrón oscuro */
-  color: #ffffff; /* Texto blanco */
+  background-color: #007bff;
+  border-color: #007bff;
+  color: #ffffff;
 }
 
 .bg-light .pagination-light .page-item .page-link {
-  background-color: #ffffff; /* Fondo blanco */
-  color: #000000; /* Texto negro */
+  background-color: #ffffff;
+  color: #000000;
 }
+
 .bg-light .pagination-light .page-item.active .page-link {
-  background-color: #8b4513; /* Marrón oscuro */
-  border-color: #8b4513; /* Borde marrón oscuro */
-  color: #ffffff; /* Texto blanco */
+  background-color: #007bff;
+  border-color: #007bff;
+  color: #ffffff;
 }
 </style>
