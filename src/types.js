@@ -4,7 +4,7 @@ const types = {
   TASK_LIST_TITLE: 'Lista de Libros',
   SERVER_ERROR_MESSAGE: 'Hubo un problema con el servidor. Por favor, inténtalo más tarde o contacta a los desarrolladores.',
   EDIT_MODAL_TITLE: 'Editar Libro',
-  ADD_TASK: 'Agregar tarea',
+  ADD_TASK: 'Agregar Libro',
   ADD_NEW_TASK: 'Agregar un nuevo Libro',
   ADD: 'Agregar',
   CONFIRMATION_MESSAGE: '¿Estás seguro de que deseas guardar los cambios?',

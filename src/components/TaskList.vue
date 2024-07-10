@@ -149,6 +149,7 @@
 
 </template>
 
+
 <script>
 import axios from 'axios';
 import { Modal } from 'bootstrap';
@@ -188,6 +189,12 @@ export default {
     },
     totalPages() {
       return Math.ceil(this.filteredBooks.length / this.booksPerPage);
+    },
+    totalBooks() {
+      return this.books.length
+    },
+    totalStock() {
+      return this.books.reduce((total, book) => total + book.stock, 0)
     },
   },
   created() {
@@ -280,6 +287,13 @@ export default {
 };
 
 </script>
+
+
+
+
+
+
+
 
 <style scoped>
 @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
