@@ -46,34 +46,34 @@
                 </tr>
               </thead>
               <tbody>
-                <tr v-for="task in paginatedTasks" :key="task.id">
-                  <td>{{ task.id }}</td>
-                  <td>{{ task.title }}</td>
-                  <td>{{ task.description }}</td>
+                <tr v-for="book in paginatedBooks" :key="book.id">
+                  <td>{{ book.id }}</td>
+                  <td>{{ book.title }}</td>
+                  <td>{{ book.description }}</td>
                   <td>
                     <span
                       :class="{
-                        'badge bg-success': task.status,
-                        'badge bg-secondary': !task.status,
+                        'badge bg-success': book.status,
+                        'badge bg-secondary': !book.status,
                       }"
                     >
                       {{
-                        task.status
+                        book.status
                           ? types.STATUS_COMPLETE
                           : types.STATUS_NO_COMPLETE
                       }}
                     </span>
                   </td>
-                  <td>{{ task.stock }}</td>
+                  <td>{{ book.stock }}</td>
                   <td>
                     <button
-                      @click="editTask(task.id)"
+                      @click="editBook(book.id)"
                       class="btn btn-warning btn-sm me-2"
                     >
-                      <i class="bi bi-pencil-fill"></i> {{ types.EDIT_TASK }}
+                      <i class="bi bi-pencil-fill"></i> {{ types.EDIT_BOOK }}
                     </button>
                     <button
-                      @click="showDeleteConfirmationModal(task.id)"
+                      @click="showDeleteConfirmationModal(book.id)"
                       class="btn btn-danger btn-sm"
                     >
                       <i class="bi bi-trash-fill"></i> {{ types.DELETE }}
@@ -128,7 +128,6 @@
         </div>
       </div>
     </div>
-
     <!-- Modal de Edición -->
     <div
       class="modal fade"
@@ -166,7 +165,7 @@
                   type="text"
                   class="form-control"
                   id="editTitle"
-                  v-model="editTaskData.title"
+                  v-model="editBookData.title"
                   required
                 />
               </div>
@@ -177,7 +176,7 @@
                 <textarea
                   class="form-control"
                   id="editDescription"
-                  v-model="editTaskData.description"
+                  v-model="editBookData.description"
                   required
                 ></textarea>
               </div>
@@ -189,7 +188,7 @@
                   type="number"
                   class="form-control"
                   id="editStock"
-                  v-model="editTaskData.stock"
+                  v-model="editBookData.stock"
                   required
                 />
               </div>
@@ -198,7 +197,7 @@
                   type="checkbox"
                   class="form-check-input"
                   id="editStatus"
-                  v-model="editTaskData.status"
+                  v-model="editBookData.status"
                 />
                 <label class="form-check-label" for="editStatus">{{
                   types.STATUS_COMPLETE
@@ -253,7 +252,7 @@
             <button
               type="button"
               class="btn btn-primary"
-              @click="confirmUpdateTask"
+              @click="confirmUpdateBook"
             >
               {{ types.CONFIRM_BUTTON }}
             </button>
@@ -261,7 +260,6 @@
         </div>
       </div>
     </div>
-
     <!-- Modal de Confirmación de Eliminación -->
     <div
       class="modal fade"
@@ -302,7 +300,7 @@
             <button
               type="button"
               class="btn btn-danger"
-              @click="confirmDeleteTask"
+              @click="confirmDeleteBook"
             >
               {{ types.DELETE }}
             </button>
@@ -327,42 +325,42 @@ export default {
   data() {
     return {
       types,
-      tasks: [],
+      books: [],
       error: null,
-      editTaskData: {
+      editBookData: {
         id: null,
         title: '',
         description: '',
         status: false,
         stock: 0,
       },
-      taskIdToDelete: null,
+      bookIdToDelete: null,
       currentPage: 1,
-      tasksPerPage: 5,
+      booksPerPage: 5,
     }
   },
   computed: {
-    paginatedTasks() {
-      const start = (this.currentPage - 1) * this.tasksPerPage
-      const end = start + this.tasksPerPage
-      return this.tasks.slice(start, end)
+    paginatedBooks() {
+      const start = (this.currentPage - 1) * this.booksPerPage
+      const end = start + this.booksPerPage
+      return this.books.slice(start, end)
     },
     totalPages() {
-      return Math.ceil(this.tasks.length / this.tasksPerPage)
+      return Math.ceil(this.books.length / this.booksPerPage)
     },
   },
   created() {
-    this.fetchTasks()
+    this.fetchBooks()
   },
   methods: {
-    fetchTasks() {
+    fetchBooks() {
       axios
-        .get('http://localhost:3000/api/tasks')
+        .get('http://localhost:3000/api/books')
         .then((response) => {
-          this.tasks = response.data
+          this.books = response.data
         })
         .catch((error) => {
-          console.error('Error fetching tasks:', error)
+          console.error('Error fetching books:', error)
           this.error =
             'Hubo un problema con el servidor. Por favor, inténtalo más tarde o contacta a los desarrolladores.'
         })
@@ -372,10 +370,10 @@ export default {
         this.currentPage = page
       }
     },
-    editTask(taskId) {
-      const task = this.tasks.find((t) => t.id === taskId)
-      if (task) {
-        this.editTaskData = { ...task }
+    editBook(bookId) {
+      const book = this.books.find((b) => b.id === bookId)
+      if (book) {
+        this.editBookData = { ...book }
         import('bootstrap/dist/js/bootstrap.bundle.min.js').then(
           (bootstrap) => {
             const modal = new bootstrap.Modal(
@@ -390,17 +388,17 @@ export default {
       const modal = new Modal(document.getElementById('confirmationModal'))
       modal.show()
     },
-    async confirmUpdateTask() {
+    async confirmUpdateBook() {
       try {
         await axios.put(
-          `http://localhost:3000/api/tasks/${this.editTaskData.id}`,
-          this.editTaskData
+          `http://localhost:3000/api/books/${this.editBookData.id}`,
+          this.editBookData
         )
         const confirmationModal = Modal.getInstance(
           document.getElementById('confirmationModal')
         )
         confirmationModal.hide()
-        this.fetchTasks()
+        this.fetchBooks()
         import('bootstrap/dist/js/bootstrap.bundle.min.js').then(
           (bootstrap) => {
             const editModal = bootstrap.Modal.getInstance(
@@ -410,28 +408,28 @@ export default {
           }
         )
       } catch (error) {
-        console.error('Error updating task:', error)
+        console.error('Error updating book:', error)
       }
     },
-    showDeleteConfirmationModal(taskId) {
-      this.taskIdToDelete = taskId
+    showDeleteConfirmationModal(bookId) {
+      this.bookIdToDelete = bookId
       const modal = new Modal(
         document.getElementById('deleteConfirmationModal')
       )
       modal.show()
     },
-    async confirmDeleteTask() {
+    async confirmDeleteBook() {
       try {
         await axios.delete(
-          `http://localhost:3000/api/tasks/${this.taskIdToDelete}`
+          `http://localhost:3000/api/books/${this.bookIdToDelete}`
         )
         const deleteModal = Modal.getInstance(
           document.getElementById('deleteConfirmationModal')
         )
         deleteModal.hide()
-        this.fetchTasks()
+        this.fetchBooks()
       } catch (error) {
-        console.error('Error deleting task:', error)
+        console.error('Error deleting book:', error)
       }
     },
     generatePDF() {
@@ -443,14 +441,14 @@ export default {
         { header: this.types.STATUS_LABEL, dataKey: 'status' },
         { header: this.types.STOCK_LABEL, dataKey: 'stock' },
       ]
-      const rows = this.tasks.map((task) => ({
-        ...task,
-        status: task.status
+      const rows = this.books.map((book) => ({
+        ...book,
+        status: book.status
           ? this.types.STATUS_COMPLETE
           : this.types.STATUS_NO_COMPLETE,
       }))
       doc.autoTable(columns, rows)
-      doc.save('tasks.pdf')
+      doc.save('books.pdf')
     },
   },
 }

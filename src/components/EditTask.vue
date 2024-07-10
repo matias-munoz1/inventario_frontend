@@ -99,7 +99,7 @@ export default {
     fetchTask() {
       const taskId = this.$route.params.id
       axios
-        .get(`http://localhost:3000/api/tasks/${taskId}`)
+        .get(`http://localhost:3000/api/books/${taskId}`)
         .then((response) => {
           this.task = response.data
           this.loading = false

@@ -42,7 +42,7 @@
                 </router-link>
               </li>
               <li class="nav-item">
-                <router-link class="nav-link nav-item-hover" to="/add">
+                <router-link class="nav-link nav-item-hover" to="/add-book">
                   <i class="bi bi-clipboard-plus-fill"></i> {{ types.ADD_TASK }}
                 </router-link>
               </li>
