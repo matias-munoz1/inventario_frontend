@@ -8,6 +8,7 @@
           'text-white',
           'text-center',
         ]"
+        
       >
         <h2 class="mb-0">{{ types.TASK_LIST_TITLE }}</h2>
       </div>
@@ -440,8 +441,8 @@ export default {
         { header: this.types.ID_INCREMENTAL, dataKey: 'id' },
         { header: this.types.TITLE_LABEL, dataKey: 'title' },
         { header: this.types.DESCRIPTION_LABEL, dataKey: 'description' },
-        { header: this.types.STATUS_LABEL, dataKey: 'status' },
         { header: this.types.STOCK_LABEL, dataKey: 'stock' },
+        { header: this.types.STATUS_LABEL, dataKey: 'status' },
       ]
       const rows = this.tasks.map((task) => ({
         ...task,

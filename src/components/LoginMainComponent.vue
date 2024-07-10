@@ -39,9 +39,10 @@
               </div>
               <div class="form-group d-md-flex">
                 <div class="w-50">
-                  <label class="checkbox-wrap checkbox-primary"
-                    >Remember Me
-                    <input type="checkbox" checked /><span class="checkmark"></span>
+                  <label class="checkbox-wrap checkbox-primary">
+                    Remember Me
+                    <input type="checkbox" checked />
+                    <span class="checkmark"></span>
                   </label>
                 </div>
                 <div class="w-50 text-md-right">
@@ -51,12 +52,12 @@
             </form>
             <p class="w-100 text-center">&mdash; Or Sign In With &mdash;</p>
             <div class="social d-flex text-center">
-              <a href="#" class="px-2 py-2 mr-md-1 rounded"
-                ><span class="fa fa-facebook mr-2"></span> Facebook</a
-              >
-              <a href="#" class="px-2 py-2 ml-md-1 rounded"
-                ><span class="fa fa-twitter mr-2"></span> Twitter</a
-              >
+              <a href="#" class="px-2 py-2 mr-md-1 rounded">
+                <span class="fa fa-facebook mr-2"></span> Facebook
+              </a>
+              <a href="#" class="px-2 py-2 ml-md-1 rounded">
+                <span class="fa fa-twitter mr-2"></span> Twitter
+              </a>
             </div>
             <p v-if="errorMessage" class="text-danger text-center mt-3">{{ errorMessage }}</p>
           </div>
@@ -67,7 +68,7 @@
 </template>
 
 <script>
-import axios from 'axios';
+import axios from 'axios'; // Asegúrate de que la ruta sea correcta
 
 export default {
   data() {
@@ -88,9 +89,11 @@ export default {
       }
 
       try {
-        const response = await axios.post('http://localhost:3000/api/login', this.form);
-        if (response.data.message === 'Login successful') {
-          console.log('User data:', response.data.user); // Muestra los datos del usuario en la consola
+        const response = await axios.post('http://localhost:3000/api/login', this.form); // Actualiza el endpoint
+        if (response.data.message === 'Bienvenido!') {
+          const token = response.data.token;
+          localStorage.setItem('token', token); // Guardar el token en el almacenamiento local
+          alert('Bienvenido!');
           this.$router.push({ path: '/TaskList' });
         } else {
           this.errorMessage = response.data.message || 'Login failed. Please try again.';
@@ -101,16 +104,28 @@ export default {
     },
     togglePassword() {
       this.passwordVisible = !this.passwordVisible;
-      const passwordField = this.$refs.password;
-      if (this.passwordVisible) {
-        passwordField.type = 'text';
-      } else {
-        passwordField.type = 'password';
-      }
     },
   },
 };
 </script>
+
+<style scoped>
+.login-background {
+  background-image: url("https://files.oaiusercontent.com/file-UulwVrXTqobGf57LKHvwuoKw?se=2024-07-04T22%3A01%3A57Z&sp=r&sv=2023-11-03&sr=b&rscc=max-age%3D604800%2C%20immutable%2C%20private&rscd=attachment%3B%20filename%3D595d3d39-86d5-4d45-b87a-a97623cf3ef2.webp&sig=R8c6l9krwORn1KoqMhN8HP4w9bYIRNGy09%2Ba2qKz0PQ%3D");
+  background-size: cover;
+  background-position: center;
+}
+
+.field-icon {
+  float: right;
+  margin-left: -25px;
+  margin-top: -25px;
+  position: relative;
+  z-index: 2;
+  cursor: pointer;
+}
+</style>
+
 
 <style scoped>
 .login-background {
