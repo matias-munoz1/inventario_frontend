@@ -7,7 +7,7 @@ import AddBook from '../components/AddBook.vue'
 const routes = [
   { path: '/Login', component: LoginMainComponent },
   { path: '/add-book', component: AddBook }, // Ruta para agregar libros
-  { path: '/edit/:id', component: EditTask },
+  { path: '/edit/:id', name: 'editBook', component: EditTask },
   { path: '/TaskList', component: TaskList },
   { path: '/', component: LoginMainComponent },
 ]

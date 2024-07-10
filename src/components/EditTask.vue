@@ -1,6 +1,6 @@
 <template>
   <div>
-    <h2>{{ types.EDIT_MODAL_TITLE }}Editar Tarea</h2>
+    <h2>{{ types.EDIT_MODAL_TITLE }}</h2>
     <div v-if="loading">Loading...</div>
     <div v-else-if="error">{{ error }}</div>
     <div v-else>
@@ -29,6 +29,15 @@
             <option :value="false">{{ types.STATUS_NO_COMPLETE }}</option>
           </select>
         </div>
+        <div class="form-group">
+          <label for="stock">{{ types.STOCK_LABEL }}</label>
+          <input
+            type="number"
+            v-model="task.stock"
+            class="form-control"
+            id="stock"
+          />
+        </div>
         <button type="submit" class="btn btn-primary">{{ types.SAVE }}</button>
       </form>
     </div>
@@ -42,7 +51,7 @@
       aria-hidden="true"
     >
       <div class="modal-dialog">
-        <div class="modal-content">
+        <div class="modal-content" :class="isDarkTheme ? 'bg-dark text-white' : 'bg-light text-dark'">
           <div class="modal-header">
             <h5 class="modal-title" id="confirmationModalLabel">
               {{ types.CONFIRM }}
@@ -83,7 +92,18 @@
 import axios from 'axios'
 import { Modal } from 'bootstrap'
 import types from '../types.js'
+
 export default {
+  props: {
+    book: {
+      type: Object,
+      required: true,
+    },
+    isDarkTheme: {
+      type: Boolean,
+      default: false,
+    },
+  },
   data() {
     return {
       types,
@@ -92,54 +112,39 @@ export default {
       error: null,
     }
   },
-  created() {
-    this.fetchTask()
+  watch: {
+    book: {
+      immediate: true,
+      handler(newBook) {
+        if (newBook) {
+          this.task = { ...newBook }
+          this.loading = false
+        }
+      }
+    }
   },
   methods: {
-    fetchTask() {
-      const taskId = this.$route.params.id
-      axios
-        .get(`http://localhost:3000/api/books/${taskId}`)
-        .then((response) => {
-          this.task = response.data
-          this.loading = false
-        })
-        .catch((error) => {
-          this.error = error.response.data.message || 'Error fetching task'
-          this.loading = false
-        })
-    },
     showConfirmationModal() {
       const modal = new Modal(document.getElementById('confirmationModal'))
       modal.show()
     },
     async confirmUpdateTask() {
-      const taskId = this.$route.params.id
       try {
-        await axios.put(`http://localhost:3000/api/tasks/${taskId}`, this.task)
+        await axios.put(`http://localhost:3000/api/books/${this.task.id}`, this.task)
         const modal = Modal.getInstance(
           document.getElementById('confirmationModal')
         )
         modal.hide()
-        this.$router.push('/')
+        this.$emit('task-updated');
       } catch (error) {
         this.error = error.response.data.message || 'Error updating task'
       }
     },
   },
 }
+
 </script>
 
-<style
-
-
-
-
-
-
-
-
-
-
-
-scoped></style>
+<style scoped>
+/* Tus estilos aquí */
+</style>

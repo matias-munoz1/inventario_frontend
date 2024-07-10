@@ -1,458 +1,284 @@
 <template>
-  <div class="container mt-5">
-    <div :class="['card', 'shadow-sm', isDarkTheme ? 'bg-dark' : 'bg-light']">
-      <div
-        :class="[
-          'card-header',
-          isDarkTheme ? 'bg-dark' : 'bg-primary',
-          'text-white',
-          'text-center',
-        ]"
+<div class="container-fluid mt-5">
+  <div :class="['card', 'shadow-sm', isDarkTheme ? 'bg-dark' : 'bg-light']">
+    <div
+      :class="[
+        'card-header',
+        isDarkTheme ? 'bg-dark' : 'bg-primary',
+        'text-white',
+        'text-center',
+      ]"
+    >
+      <h2 class="mb-0">{{ types.TASK_LIST_TITLE }}</h2>
+      
+    </div>
+    <div
+      :class="[
+        'card-body',
+        isDarkTheme ? 'bg-dark' : 'bg-light',
+        isDarkTheme ? 'text-white' : 'text-dark',
+      ]"
+    >
+      <div v-if="error" class="alert alert-danger">
+        {{ types.SERVER_ERROR_MESSAGE }}
+      </div>
+      <div v-else>
         
-      >
-        <h2 class="mb-0">{{ types.TASK_LIST_TITLE }}</h2>
-      </div>
-      <div
-        :class="[
-          'card-body',
-          isDarkTheme ? 'bg-dark' : 'bg-light',
-          isDarkTheme ? 'text-white' : 'text-dark',
-        ]"
-      >
-        <div v-if="error" class="alert alert-danger">
-          {{ types.SERVER_ERROR_MESSAGE }}
-        </div>
-        <div v-else>
-          <button @click="generatePDF" class="btn btn-secondary mb-3">
-            {{ types.GENERATE_PDF }}
-          </button>
-          <div class="table-responsive">
-            <table
-              :class="[
-                'table',
-                'table-bordered',
-                'table-hover',
-                'table-striped',
-                isDarkTheme ? 'table-dark' : 'table-light',
-              ]"
-            >
-              <thead :class="isDarkTheme ? 'thead-dark' : 'thead-light'">
-                <tr>
-                  <th scope="col">{{ types.ID_INCREMENTAL }}</th>
-                  <th scope="col">{{ types.TITLE_LABEL }}</th>
-                  <th scope="col">{{ types.DESCRIPTION_LABEL }}</th>
-                  <th scope="col">{{ types.STATUS_LABEL }}</th>
-                  <th scope="col">{{ types.STOCK_LABEL }}</th>
-                  <th scope="col">{{ types.ACTIONS_LABEL }}</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-for="book in paginatedBooks" :key="book.id">
-                  <td>{{ book.id }}</td>
-                  <td>{{ book.title }}</td>
-                  <td>{{ book.description }}</td>
-                  <td>
-                    <span
-                      :class="{
-                        'badge bg-success': book.status,
-                        'badge bg-secondary': !book.status,
-                      }"
-                    >
-                      {{
-                        book.status
-                          ? types.STATUS_COMPLETE
-                          : types.STATUS_NO_COMPLETE
-                      }}
-                    </span>
-                  </td>
-                  <td>{{ book.stock }}</td>
-                  <td>
-                    <button
-                      @click="editBook(book.id)"
-                      class="btn btn-warning btn-sm me-2"
-                    >
-                      <i class="bi bi-pencil-fill"></i> {{ types.EDIT_BOOK }}
-                    </button>
-                    <button
-                      @click="showDeleteConfirmationModal(book.id)"
-                      class="btn btn-danger btn-sm"
-                    >
-                      <i class="bi bi-trash-fill"></i> {{ types.DELETE }}
-                    </button>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-          <nav
-            aria-label="Page navigation"
-            class="d-flex justify-content-center"
+  <div class="d-flex justify-content-end mb-3">
+    <input v-model="searchQuery" @input="filterBooks" type="text" class="form-control w-25" placeholder="Buscar libro...">
+  </div>
+        <div class="table-responsive">
+          <table
+            :class="[
+              'table',
+              'table-bordered',
+              'table-hover',
+              'table-striped',
+              isDarkTheme ? 'table-dark' : 'table-light',
+            ]"
+            style="width: 100%; border-collapse: collapse;"
           >
-            <ul
-              class="pagination pagination-md"
-              :class="isDarkTheme ? 'pagination-dark' : 'pagination-light'"
-            >
-              <li class="page-item" :class="{ disabled: currentPage === 1 }">
-                <a
-                  class="page-link"
-                  href="#"
-                  @click.prevent="changePage(currentPage - 1)"
-                  >{{ types.PREVIOUS_NAVIGATION }}</a
-                >
-              </li>
-              <li
-                class="page-item"
-                v-for="page in totalPages"
-                :key="page"
-                :class="{ active: page === currentPage }"
-              >
-                <a
-                  class="page-link"
-                  href="#"
-                  @click.prevent="changePage(page)"
-                  >{{ page }}</a
-                >
-              </li>
-              <li
-                class="page-item"
-                :class="{ disabled: currentPage === totalPages }"
-              >
-                <a
-                  class="page-link"
-                  href="#"
-                  @click.prevent="changePage(currentPage + 1)"
-                  >{{ types.AFTER_NAVIGATION }}</a
-                >
-              </li>
-            </ul>
-          </nav>
-        </div>
-      </div>
-    </div>
-    <!-- Modal de Edición -->
-    <div
-      class="modal fade"
-      id="editTaskModal"
-      tabindex="-1"
-      aria-labelledby="editTaskModalLabel"
-      aria-hidden="true"
-    >
-      <div class="modal-dialog">
-        <div
-          :class="[
-            'modal-content',
-            isDarkTheme ? 'bg-dark' : 'bg-light',
-            isDarkTheme ? 'text-white' : 'text-dark',
-          ]"
-        >
-          <div class="modal-header">
-            <h5 class="modal-title" id="editTaskModalLabel">
-              {{ types.EDIT_MODAL_TITLE }}
-            </h5>
-            <button
-              type="button"
-              class="btn-close"
-              data-bs-dismiss="modal"
-              aria-label="Close"
-            ></button>
-          </div>
-          <div class="modal-body">
-            <form @submit.prevent="showConfirmationModal">
-              <div class="mb-3">
-                <label for="editTitle" class="form-label">{{
-                  types.TITLE_LABEL
-                }}</label>
-                <input
-                  type="text"
-                  class="form-control"
-                  id="editTitle"
-                  v-model="editBookData.title"
-                  required
-                />
-              </div>
-              <div class="mb-3">
-                <label for="editDescription" class="form-label">{{
-                  types.DESCRIPTION_LABEL
-                }}</label>
-                <textarea
-                  class="form-control"
-                  id="editDescription"
-                  v-model="editBookData.description"
-                  required
-                ></textarea>
-              </div>
-              <div class="mb-3">
-                <label for="editStock" class="form-label">{{
-                  types.STOCK_LABEL
-                }}</label>
-                <input
-                  type="number"
-                  class="form-control"
-                  id="editStock"
-                  v-model="editBookData.stock"
-                  required
-                />
-              </div>
-              <div class="mb-3 form-check">
-                <input
-                  type="checkbox"
-                  class="form-check-input"
-                  id="editStatus"
-                  v-model="editBookData.status"
-                />
-                <label class="form-check-label" for="editStatus">{{
-                  types.STATUS_COMPLETE
-                }}</label>
-              </div>
-              <button type="submit" class="btn btn-primary">
-                {{ types.SAVE_BUTTON }}
-              </button>
-            </form>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Modal de Confirmación -->
-    <div
-      class="modal fade"
-      id="confirmationModal"
-      tabindex="-1"
-      aria-labelledby="confirmationModalLabel"
-      aria-hidden="true"
-    >
-      <div class="modal-dialog">
-        <div
-          :class="[
-            'modal-content',
-            isDarkTheme ? 'bg-dark text-white' : 'bg-light text-dark',
-          ]"
-        >
-          <div class="modal-header">
-            <h5 class="modal-title" id="confirmationModalLabel">
-              {{ types.CONFIRM }}
-            </h5>
-            <button
-              type="button"
-              class="btn-close"
-              data-bs-dismiss="modal"
-              aria-label="Close"
-            ></button>
-          </div>
-          <div class="modal-body">
-            {{ types.CONFIRMATION_MESSAGE }}
-          </div>
-          <div class="modal-footer">
-            <button
-              type="button"
-              class="btn btn-secondary"
-              data-bs-dismiss="modal"
-            >
-              {{ types.CANCEL_BUTTON }}
-            </button>
-            <button
-              type="button"
-              class="btn btn-primary"
-              @click="confirmUpdateBook"
-            >
-              {{ types.CONFIRM_BUTTON }}
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-    <!-- Modal de Confirmación de Eliminación -->
-    <div
-      class="modal fade"
-      id="deleteConfirmationModal"
-      tabindex="-1"
-      aria-labelledby="deleteConfirmationModalLabel"
-      aria-hidden="true"
-    >
-      <div class="modal-dialog">
-        <div
-          :class="[
-            'modal-content',
-            isDarkTheme ? 'bg-dark text-white' : 'bg-light text-dark',
-          ]"
-        >
-          <div class="modal-header">
-            <h5 class="modal-title" id="deleteConfirmationModalLabel">
-              {{ types.CONFIRM_DELETION }}
-            </h5>
-            <button
-              type="button"
-              class="btn-close"
-              data-bs-dismiss="modal"
-              aria-label="Close"
-            ></button>
-          </div>
-          <div class="modal-body">
-            {{ types.DELETE_CONFIRMATION_MODAL_MESSAGE }}
-          </div>
-          <div class="modal-footer">
-            <button
-              type="button"
-              class="btn btn-secondary"
-              data-bs-dismiss="modal"
-            >
-              {{ types.CANCEL_BUTTON }}
-            </button>
-            <button
-              type="button"
-              class="btn btn-danger"
-              @click="confirmDeleteBook"
-            >
-              {{ types.DELETE }}
-            </button>
-          </div>
+          
+            <thead :class="isDarkTheme ? 'thead-dark' : 'thead-light'">
+              <tr>
+                <th scope="col">{{ types.ID_INCREMENTAL }}</th>
+                <th scope="col">{{ types.TITLE_LABEL }}</th>
+                <th scope="col">{{ types.DESCRIPTION_LABEL }}</th>
+                <th scope="col">{{ types.STATUS_LABEL }}</th>
+                <th scope="col">{{ types.STOCK_LABEL }}</th>
+                <th scope="col">{{ types.ACTIONS_LABEL }}</th>
+              </tr>
+            </thead>
+            
+            <tbody>
+              <tr v-for="book in paginatedBooks" :key="book.id">
+                <td>{{ book.id }}</td>
+                <td>{{ book.title }}</td>
+                <td>{{ book.description }}</td>
+                <td>
+                  <span :class="book.status ? 'badge bg-success' : 'badge bg-danger'">
+                    {{ book.status ? 'Inventario completo' : 'Inventario pendiente' }}
+                  </span>
+                </td>
+                <td>{{ book.stock }}</td>
+                <td class="actions">
+                  <button @click="editBook(book.id)" class="btn btn-warning btn-sm">
+                    <i class="bi bi-pencil-fill"></i> Editar
+                  </button>
+                  <button @click="openDeleteModal(book.id)" class="btn btn-danger btn-sm">
+                    <i class="bi bi-trash-fill"></i> Eliminar
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+            
+          </table>
+          
         </div>
       </div>
     </div>
   </div>
+
+  <!-- Modal de edición -->
+  <div class="modal fade" id="editTaskModal" tabindex="-1" aria-labelledby="editTaskModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content" :class="isDarkTheme ? 'bg-dark text-white' : 'bg-light text-dark'">
+        <div class="modal-header">
+          <h5 class="modal-title" id="editTaskModalLabel">Editar Libro</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <edit-task :book="editBookData" :isDarkTheme="isDarkTheme" v-if="editBookData" @task-updated="fetchBooks"></edit-task>
+          <p v-else>Book not found</p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal de confirmación de eliminación -->
+  <div v-if="showDeleteModal" class="modal fade show d-block" tabindex="-1" role="dialog" aria-labelledby="deleteConfirmationModalLabel" aria-hidden="true" :class="isDarkTheme ? 'bg-dark' : 'bg-light'" style="background-color: rgba(0, 0, 0, 0.5);">
+    <div class="modal-dialog" role="document">
+      <div :class="['modal-content', isDarkTheme ? 'bg-dark text-white' : 'bg-light text-dark']">
+        <div class="modal-header">
+          <h5 class="modal-title" id="deleteConfirmationModalLabel">Confirmar Eliminación</h5>
+          <button type="button" class="close" @click="closeDeleteModal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          ¿Estás seguro de que deseas eliminar este libro?
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" @click="closeDeleteModal">Cancelar</button>
+          <button type="button" class="btn btn-danger" @click="confirmDelete">Eliminar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Controles de paginación -->
+  <nav>
+    <ul class="pagination justify-content-center">
+      <li class="page-item" :class="{ disabled: currentPage === 1 }">
+        <button class="page-link" @click="changePage(currentPage - 1)">Anterior</button>
+      </li>
+      <li
+        v-for="page in totalPages"
+        :key="page"
+        class="page-item"
+        :class="{ active: currentPage === page }"
+      >
+        <button class="page-link" @click="changePage(page)">{{ page }}</button>
+      </li>
+      <li class="page-item" :class="{ disabled: currentPage === totalPages }">
+        <button class="page-link" @click="changePage(currentPage + 1)">Siguiente</button>
+      </li>
+    </ul>
+  </nav>
+      <div class="d-flex justify-content-center px-5">
+                  
+            <button @click="generatePDF" class="btn btn-secondary">
+              Generar Informe
+            </button>
+            </div>  
+        
+</div>
+
 </template>
 
 <script>
-import axios from 'axios'
-import { jsPDF } from 'jspdf'
-import 'jspdf-autotable'
-import { Modal } from 'bootstrap'
-import types from '../types.js'
+import axios from 'axios';
+import { Modal } from 'bootstrap';
+import types from '../types.js';
+import EditTask from './EditTask.vue';
+import jsPDF from 'jspdf';
+import 'jspdf-autotable';
 
 export default {
+  components: {
+    EditTask
+  },
   props: {
     isDarkTheme: Boolean,
   },
   data() {
     return {
+      isDarkTheme: true,
       types,
       books: [],
+      searchQuery: '',
+      filteredBooks: [],
       error: null,
-      editBookData: {
-        id: null,
-        title: '',
-        description: '',
-        status: false,
-        stock: 0,
-      },
-      bookIdToDelete: null,
+      editBookId: null,
+      editBookData: null,
       currentPage: 1,
       booksPerPage: 5,
-    }
+      bookIdToDelete: null,
+      showDeleteModal: false,
+    };
   },
   computed: {
     paginatedBooks() {
-      const start = (this.currentPage - 1) * this.booksPerPage
-      const end = start + this.booksPerPage
-      return this.books.slice(start, end)
+      const start = (this.currentPage - 1) * this.booksPerPage;
+      const end = start + this.booksPerPage;
+      return this.filteredBooks.slice(start, end);
     },
     totalPages() {
-      return Math.ceil(this.books.length / this.booksPerPage)
+      return Math.ceil(this.filteredBooks.length / this.booksPerPage);
     },
   },
   created() {
-    this.fetchBooks()
+    this.loadBooks();
   },
   methods: {
-    fetchBooks() {
-      axios
-        .get('http://localhost:3000/api/books')
-        .then((response) => {
-          this.books = response.data
+    loadBooks() {
+      axios.get('http://localhost:3000/api/books/')
+        .then(response => {
+          this.books = response.data;
+          this.filteredBooks = this.books; // Inicializar libros filtrados con todos los libros
         })
-        .catch((error) => {
-          console.error('Error fetching books:', error)
-          this.error =
-            'Hubo un problema con el servidor. Por favor, inténtalo más tarde o contacta a los desarrolladores.'
-        })
+        .catch(error => {
+          console.error('Hubo un error al cargar los libros:', error);
+          this.error = 'Hubo un problema con el servidor. Por favor, inténtalo más tarde o contacta a los desarrolladores.';
+        });
+    },
+    filterBooks() {
+      if (this.searchQuery.trim() === '') {
+        this.filteredBooks = this.books;
+      } else {
+        const query = this.searchQuery.trim().toLowerCase();
+        this.filteredBooks = this.books.filter(book => 
+          book.title.toLowerCase().includes(query) ||
+          book.description.toLowerCase().includes(query)
+        );
+      }
+      this.currentPage = 1; // Resetear a la primera página al filtrar
     },
     changePage(page) {
       if (page > 0 && page <= this.totalPages) {
-        this.currentPage = page
+        this.currentPage = page;
       }
     },
     editBook(bookId) {
-      const book = this.books.find((b) => b.id === bookId)
+      const book = this.books.find((b) => b.id === bookId);
       if (book) {
-        this.editBookData = { ...book }
+        this.editBookId = bookId;
+        this.editBookData = book;
         import('bootstrap/dist/js/bootstrap.bundle.min.js').then(
           (bootstrap) => {
             const modal = new bootstrap.Modal(
               document.getElementById('editTaskModal')
-            )
-            modal.show()
+            );
+            modal.show();
           }
-        )
+        );
+      } else {
+        console.error('Book not found with ID:', bookId);
+        this.editBookData = null; // Asegúrate de manejar el caso donde no se encuentra el libro
       }
     },
-    showConfirmationModal() {
-      const modal = new Modal(document.getElementById('confirmationModal'))
-      modal.show()
+    openDeleteModal(bookId) {
+      this.bookIdToDelete = bookId;
+      this.showDeleteModal = true;
     },
-    async confirmUpdateBook() {
-      try {
-        await axios.put(
-          `http://localhost:3000/api/books/${this.editBookData.id}`,
-          this.editBookData
-        )
-        const confirmationModal = Modal.getInstance(
-          document.getElementById('confirmationModal')
-        )
-        confirmationModal.hide()
-        this.fetchBooks()
-        import('bootstrap/dist/js/bootstrap.bundle.min.js').then(
-          (bootstrap) => {
-            const editModal = bootstrap.Modal.getInstance(
-              document.getElementById('editTaskModal')
-            )
-            editModal.hide()
-          }
-        )
-      } catch (error) {
-        console.error('Error updating book:', error)
-      }
+    closeDeleteModal() {
+      this.showDeleteModal = false;
+      this.bookIdToDelete = null;
     },
-    showDeleteConfirmationModal(bookId) {
-      this.bookIdToDelete = bookId
-      const modal = new Modal(
-        document.getElementById('deleteConfirmationModal')
-      )
-      modal.show()
-    },
-    async confirmDeleteBook() {
-      try {
-        await axios.delete(
-          `http://localhost:3000/api/books/${this.bookIdToDelete}`
-        )
-        const deleteModal = Modal.getInstance(
-          document.getElementById('deleteConfirmationModal')
-        )
-        deleteModal.hide()
-        this.fetchBooks()
-      } catch (error) {
-        console.error('Error deleting book:', error)
-      }
+    confirmDelete() {
+      axios.delete(`http://localhost:3000/api/books/${this.bookIdToDelete}`)
+        .then(response => {
+          this.books = this.books.filter(book => book.id !== this.bookIdToDelete);
+          this.filteredBooks = this.books;
+          this.closeDeleteModal();
+          alert('Libro eliminado con éxito.');
+        })
+        .catch(error => {
+          console.error('Hubo un error al eliminar el libro:', error);
+        });
     },
     generatePDF() {
-      const doc = new jsPDF()
+      const doc = new jsPDF();
       const columns = [
         { header: this.types.ID_INCREMENTAL, dataKey: 'id' },
         { header: this.types.TITLE_LABEL, dataKey: 'title' },
         { header: this.types.DESCRIPTION_LABEL, dataKey: 'description' },
         { header: this.types.STOCK_LABEL, dataKey: 'stock' },
         { header: this.types.STATUS_LABEL, dataKey: 'status' },
-      ]
-      const rows = this.books.map((book) => ({
+      ];
+      const rows = this.filteredBooks.map((book) => ({
         ...book,
-        status: book.status
-          ? this.types.STATUS_COMPLETE
-          : this.types.STATUS_NO_COMPLETE,
-      }))
-      doc.autoTable(columns, rows)
-      doc.save('books.pdf')
+        status: book.status ? this.types.STATUS_COMPLETE : this.types.STATUS_NO_COMPLETE,
+      }));
+      doc.autoTable(columns, rows);
+      doc.save('books.pdf');
     },
   },
-}
+};
+
 </script>
 
 <style scoped>
@@ -465,8 +291,8 @@ body {
   font-family: 'Roboto', sans-serif;
 }
 
-.container {
-  max-width: 900px;
+.container-fluid {
+  max-width: 100%;
 }
 
 .card-header {
@@ -475,14 +301,20 @@ body {
   text-align: center;
 }
 
+.table {
+  border-collapse: collapse; /* Asegura que no haya espacio entre bordes */
+}
+
 .table thead th {
   vertical-align: middle;
   text-align: center;
+  padding: 12px;
 }
 
 .table tbody td {
   vertical-align: middle;
   text-align: center;
+  padding: 12px;
 }
 
 .table-responsive {
@@ -496,6 +328,33 @@ body {
 .page-link {
   cursor: pointer;
   outline: none !important;
+}
+
+.actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 100%;
+  padding: 0;
+}
+
+.actions .btn {
+  flex: 1;
+  margin: 0 2px; /* Ajusta el margen según sea necesario */
+  height: 50px; /* Ajusta la altura según sea necesario */
+  padding: 2px 5px; /* Ajusta el padding para que los botones no se vean demasiado grandes */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 14px; /* Ajusta el tamaño de la fuente según sea necesario */
+}
+
+.actions .btn:first-child {
+  margin-left: 0;
+}
+
+.actions .btn:last-child {
+  margin-right: 0;
 }
 
 .bg-dark .table-dark thead th,
@@ -539,5 +398,34 @@ body {
   background-color: #007bff;
   border-color: #007bff;
   color: #ffffff;
+}
+.text-success {
+  color: green !important;
+  border: 1px solid green;
+  padding: 2px 5px;
+  border-radius: 3px;
+}
+
+.text-danger {
+  color: red !important;
+  border: 1px solid red;
+  padding: 2px 5px;
+  border-radius: 3px;
+}
+.modal.show.d-block {
+  display: block;
+}
+
+
+.modal-header, .modal-footer {
+  border: none;
+}
+
+.modal-content.bg-dark {
+  background-color: #343a40;
+}
+
+.modal-content.bg-light {
+  background-color: #f8f9fa;
 }
 </style>
