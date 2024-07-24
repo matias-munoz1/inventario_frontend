@@ -9,7 +9,9 @@
           'text-center',
         ]"
       >
+      
         <h2 class="mb-0">{{ types.TASK_LIST_TITLE }}</h2>
+        
       </div>
       <div
         :class="[
@@ -30,6 +32,7 @@
               <option value="publisher">Editorial</option>
             </select>
             <input v-model="searchQuery" @input="filterBooks" type="text" class="form-control w-25" placeholder="Buscar libro...">
+            
           </div>
           <div class="table-responsive">
             <table
@@ -49,6 +52,7 @@
                   <th scope="col">{{ types.DESCRIPTION_LABEL }}</th>
                   <th scope="col">Categoría</th>
                   <th scope="col">Editorial</th>
+                  <th scope="col">Ciudad</th>
                   <th scope="col">{{ types.STATUS_LABEL }}</th>
                   <th scope="col">{{ types.STOCK_LABEL }}</th>
                   <th v-if="userRole !== 'viewer'" scope="col">{{ types.ACTIONS_LABEL }}</th>
@@ -61,6 +65,7 @@
                   <td>{{ book.description }}</td>
                   <td>{{ book.category }}</td>
                   <td>{{ book.publisher }}</td>
+                  <td>{{ book.city }}</td>
                   <td>
                     <span :class="book.status ? 'badge bg-success' : 'badge bg-danger'">
                       {{ book.status ? 'Inventario completo' : 'Inventario pendiente' }}
@@ -146,7 +151,7 @@
       <button v-if="userRole !== 'editor' && userRole !== 'viewer'" @click="generatePDF" class="btn btn-secondary">
   Generar Informe
   </button>
-
+  <button @click="goToStockPage" class="btn btn-stock ml-3">Stock de Bodegas</button>
     </div>  
   </div>
 </template>
@@ -207,39 +212,44 @@ export default {
     this.loadBooks();
   },
   methods: {
-  loadBooks() {
-    axios.get('http://localhost:3000/api/books/')
-      .then(response => {
-        this.books = response.data;
-        this.filteredBooks = this.books; // Inicializar libros filtrados con todos los libros
-      })
-      .catch(error => {
-        console.error('Hubo un error al cargar los libros:', error);
-        this.error = 'Hubo un problema con el servidor. Por favor, inténtalo más tarde o contacta a los desarrolladores.';
-      });
-  },
-  filterBooks() {
-    if (this.searchQuery.trim() === '') {
-      this.filteredBooks = this.books;
-    } else {
-      const query = this.searchQuery.trim().toLowerCase();
-      this.filteredBooks = this.books.filter(book => {
-        switch (this.selectedFilter) {
-          case 'title':
-            return book.title && book.title.toLowerCase().includes(query);
-          case 'description':
-            return book.description && book.description.toLowerCase().includes(query);
-          case 'category':
-            return book.category && book.category.toLowerCase().includes(query);
-          case 'publisher':
-            return book.publisher && book.publisher.toLowerCase().includes(query);
-          default:
-            return false;
-        }
-      });
-    }
-    this.currentPage = 1; // Resetear a la primera página al filtrar
-  },
+    goToStockPage() {
+      this.$router.push('/stock');
+    },
+    loadBooks() {
+      axios.get('http://localhost:3000/api/books/')
+        .then(response => {
+          this.books = response.data;
+          this.filteredBooks = this.books; // Inicializar libros filtrados con todos los libros
+        })
+        .catch(error => {
+          console.error('Hubo un error al cargar los libros:', error);
+          this.error = 'Hubo un problema con el servidor. Por favor, inténtalo más tarde o contacta a los desarrolladores.';
+        });
+    },
+    filterBooks() {
+      if (this.searchQuery.trim() === '') {
+        this.filteredBooks = this.books;
+      } else {
+        const query = this.searchQuery.trim().toLowerCase();
+        this.filteredBooks = this.books.filter(book => {
+          switch (this.selectedFilter) {
+            case 'title':
+              return book.title && book.title.toLowerCase().includes(query);
+            case 'description':
+              return book.description && book.description.toLowerCase().includes(query);
+            case 'category':
+              return book.category && book.category.toLowerCase().includes(query);
+            case 'publisher':
+              return book.publisher && book.publisher.toLowerCase().includes(query);
+            case 'city':
+              return book.city && book.city.toLowerCase().includes(query);
+            default:
+              return false;
+          }
+        });
+      }
+      this.currentPage = 1; // Resetear a la primera página al filtrar
+    },
     changePage(page) {
       if (page > 0 && page <= this.totalPages) {
         this.currentPage = page;
@@ -296,6 +306,9 @@ export default {
         { header: this.types.ID_INCREMENTAL, dataKey: 'id' },
         { header: this.types.TITLE_LABEL, dataKey: 'title' },
         { header: this.types.DESCRIPTION_LABEL, dataKey: 'description' },
+        { header: 'Categoría', dataKey: 'category' },
+        { header: 'Editorial', dataKey: 'publisher' },
+        { header: 'Ciudad', dataKey: 'city' },
         { header: this.types.STOCK_LABEL, dataKey: 'stock' },
         { header: this.types.STATUS_LABEL, dataKey: 'status' },
       ];
@@ -313,3 +326,16 @@ export default {
   },
 };
 </script>
+
+<style scoped>
+/* Otros estilos ... */
+.btn-stock {
+  background-color: #28a745;
+  border-color: #28a745;
+  color: white;
+}
+.btn-stock:hover {
+  background-color: #218838;
+  border-color: #1e7e34;
+}
+</style>

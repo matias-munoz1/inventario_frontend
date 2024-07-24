@@ -23,24 +23,6 @@
           ></textarea>
         </div>
         <div class="form-group">
-          <label for="category">Categoría</label>
-          <input
-            type="text"
-            v-model="task.category"
-            class="form-control"
-            id="category"
-          />
-        </div>
-        <div class="form-group">
-          <label for="publisher">Editorial</label>
-          <input
-            type="text"
-            v-model="task.publisher"
-            class="form-control"
-            id="publisher"
-          />
-        </div>
-        <div class="form-group">
           <label for="status">{{ types.STATUS_LABEL }}</label>
           <select v-model="task.status" class="form-control" id="status">
             <option :value="true">{{ types.COMPLETE }}</option>
@@ -55,6 +37,12 @@
             class="form-control"
             id="stock"
           />
+        </div>
+        <div class="form-group">
+          <label for="city">Ciudad</label>
+          <select v-model="task.city" class="form-control" id="city">
+            <option v-for="city in cities" :key="city" :value="city">{{ city }}</option>
+          </select>
         </div>
         <button type="submit" class="btn btn-primary">{{ types.SAVE }}</button>
       </form>
@@ -105,10 +93,11 @@
     </div>
   </div>
 </template>
+
 <script>
-import axios from 'axios'
-import { Modal } from 'bootstrap'
-import types from '../types.js'
+import axios from 'axios';
+import { Modal } from 'bootstrap';
+import types from '../types.js';
 
 export default {
   props: {
@@ -127,40 +116,38 @@ export default {
       task: {},
       loading: true,
       error: null,
-    }
+      cities: ['Viña del Mar', 'Rancagua', 'Curicó', 'Talca', 'Chillán', 'Talcahuano (Mall Trébol)', 'Concepción', 'Los Ángeles', 'Temuco', 'Valdivia', 'Osorno', 'Puerto Montt']
+    };
   },
   watch: {
     book: {
       immediate: true,
       handler(newBook) {
         if (newBook) {
-          this.task = { ...newBook }
-          this.loading = false
+          this.task = { ...newBook };
+          this.loading = false;
         }
       }
     }
   },
   methods: {
     showConfirmationModal() {
-      const modal = new Modal(document.getElementById('confirmationModal'))
-      modal.show()
+      const modal = new Modal(document.getElementById('confirmationModal'));
+      modal.show();
     },
     async confirmUpdateTask() {
       try {
-        await axios.put(`http://localhost:3000/api/books/${this.task.id}`, this.task)
-        const modal = Modal.getInstance(
-          document.getElementById('confirmationModal')
-        )
-        modal.hide()
+        await axios.put(`http://localhost:3000/api/books/${this.task.id}`, this.task);
+        const modal = Modal.getInstance(document.getElementById('confirmationModal'));
+        modal.hide();
         this.$emit('task-updated');
       } catch (error) {
-        this.error = error.response.data.message || 'Error updating task'
+        this.error = error.response.data.message || 'Error updating task';
       }
     },
   },
-}
+};
 </script>
-
 
 <style scoped>
 /* Tus estilos aquí */
