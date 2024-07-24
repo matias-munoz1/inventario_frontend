@@ -3,7 +3,9 @@
     :class="{ 'dark-theme': isDarkTheme, 'light-theme': !isDarkTheme }"
     id="app"
   >
+    <!-- Mostrar el header solo si no estás en la página de login -->
     <header
+      v-if="!isLoginPage"
       :class="{ 'dark-header': isDarkTheme, 'light-header': !isDarkTheme }"
     >
       <nav class="navbar navbar-expand-lg">
@@ -41,19 +43,27 @@
                   <i class="bi bi-book-fill"></i>{{ types.INVENTARIO_DE_LIBROS }}
                 </router-link>
               </li>
-              <li class="nav-item">
+              <li class="nav-item" v-if="userRole !== 'viewer'">
                 <router-link class="nav-link nav-item-hover" to="/add-book">
                   <i class="bi bi-clipboard-plus-fill"></i> {{ types.ADD_TASK }}
                 </router-link>
               </li>
               <li class="nav-item ms-3">
                 <button
+                  @click="handleLogout"
+                  class="btn btn-outline-secondary"
+                >
+                  Cerrar Sesión
+                </button>
+              </li>
+              <li class="nav-item ms-3">
+                <!-- <button
                   @click="toggleTheme"
                   class="btn btn-outline-secondary theme-button"
                 >
                   <i v-if="isDarkTheme" class="bi bi-sun"></i>
                   <i v-else class="bi bi-moon"></i>
-                </button>
+                </button> -->
               </li>
             </ul>
           </div>
@@ -67,32 +77,50 @@
 </template>
 
 <script>
-import types from './types.js'
+import { mapActions, mapGetters } from 'vuex';
+import types from './types.js';
 
 export default {
   data() {
     return {
       types,
       isDarkTheme: true,
-    }
+    };
   },
-  methods: {
-    toggleTheme() {
-      this.isDarkTheme = !this.isDarkTheme
+  computed: {
+    ...mapGetters(['userRole']),
+    isLoginPage() {
+      return this.$route.path === '/Login' || this.$route.path === '/';
     },
   },
-}
+  methods: {
+    ...mapActions(['logout']),
+    toggleTheme() {
+      this.isDarkTheme = !this.isDarkTheme;
+    },
+    handleLogout() {
+      this.logout();
+      this.$router.push('/Login');
+    },
+  },
+};
 </script>
-
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
 @import 'bootstrap/dist/css/bootstrap.min.css';
 @import 'bootstrap-icons/font/bootstrap-icons.css';
 
 /* Estilos generales */
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+}
+
 #app {
   min-height: 100vh;
-  font-family: 'Roboto', sans-serif;
+  display: flex;
+  flex-direction: column;
 }
 
 header {
