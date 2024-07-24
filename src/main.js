@@ -13,4 +13,5 @@ import 'jquery';
 const app = createApp(App)
 app.use(VueAxios, axios)
 app.use(router)
-app.mount('#app')
+
+app.mount('#app');
