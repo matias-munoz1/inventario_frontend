@@ -51,7 +51,7 @@
                   <th scope="col">Editorial</th>
                   <th scope="col">{{ types.STATUS_LABEL }}</th>
                   <th scope="col">{{ types.STOCK_LABEL }}</th>
-                  <th scope="col">{{ types.ACTIONS_LABEL }}</th>
+                  <th v-if="userRole !== 'viewer'" scope="col">{{ types.ACTIONS_LABEL }}</th>
                 </tr>
               </thead>
               <tbody>
@@ -62,10 +62,10 @@
                   <td>{{ book.category }}</td>
                   <td>{{ book.publisher }}</td>
                   <td>
-  <span :class="book.status ? 'badge bg-success' : 'badge bg-danger'">
-    {{ book.status ? 'Inventario completo' : 'Inventario pendiente' }}
-  </span>
-</td>
+                    <span :class="book.status ? 'badge bg-success' : 'badge bg-danger'">
+                      {{ book.status ? 'Inventario completo' : 'Inventario pendiente' }}
+                    </span>
+                  </td>
                   <td>{{ book.stock }}</td>
                   <td v-if="userRole !== 'viewer'" class="actions">
                     <button @click="editBook(book.id)" class="btn btn-warning btn-sm">
@@ -144,78 +144,81 @@
     </nav>
     <div class="d-flex justify-content-center px-5">
       <button v-if="userRole !== 'editor' && userRole !== 'viewer'" @click="generatePDF" class="btn btn-secondary">
-        Generar Informe
-      </button>
+  Generar Informe
+  </button>
+
     </div>  
   </div>
 </template>
 
-  
-  <script>
-  import axios from 'axios';
-  import { Modal } from 'bootstrap';
-  import types from '../types.js';
-  import EditTask from './EditTask.vue';
-  import jsPDF from 'jspdf';
-  import 'jspdf-autotable';
-  
-  export default {
-    components: {
-      EditTask
+<script>
+import axios from 'axios';
+import { Modal } from 'bootstrap';
+import types from '../types.js';
+import EditTask from './EditTask.vue';
+import jsPDF from 'jspdf';
+import 'jspdf-autotable';
+
+export default {
+  components: {
+    EditTask
+  },
+  props: {
+    isDarkTheme: Boolean,
+  },
+  data() {
+    return {
+      isDarkTheme: true,
+      types,
+      books: [],
+      searchQuery: '',
+      filteredBooks: [],
+      selectedFilter: 'title',
+      error: null,
+      editBookId: null,
+      editBookData: null,
+      currentPage: 1,
+      booksPerPage: 5,
+      bookIdToDelete: null,
+      showDeleteModal: false,
+      createdDate: new Date().toLocaleDateString(), // Fecha de creación
+    };
+  },
+  computed: {
+    paginatedBooks() {
+      const start = (this.currentPage - 1) * this.booksPerPage;
+      const end = start + this.booksPerPage;
+      return this.filteredBooks.slice(start, end);
     },
-    props: {
-      isDarkTheme: Boolean,
+    totalPages() {
+      return Math.ceil(this.filteredBooks.length / this.booksPerPage);
     },
-    data() {
-      return {
-        isDarkTheme: true,
-        types,
-        books: [],
-        searchQuery: '',
-        filteredBooks: [],
-        selectedFilter: 'title',
-        error: null,
-        editBookId: null,
-        editBookData: null,
-        currentPage: 1,
-        booksPerPage: 5,
-        bookIdToDelete: null,
-        showDeleteModal: false,
-        createdDate: new Date().toLocaleDateString(), // Fecha de creación
-      };
+    totalBooks() {
+      return this.books.length;
     },
-    computed: {
-      paginatedBooks() {
-        const start = (this.currentPage - 1) * this.booksPerPage;
-        const end = start + this.booksPerPage;
-        return this.filteredBooks.slice(start, end);
-      },
-      totalPages() {
-        return Math.ceil(this.filteredBooks.length / this.booksPerPage);
-      },
-      totalBooks() {
-        return this.books.length;
-      },
-      totalStock() {
-        return this.books.reduce((total, book) => total + book.stock, 0);
-      },
+    totalStock() {
+      return this.books.reduce((total, book) => total + book.stock, 0);
     },
-    created() {
-      this.loadBooks();
-    },
-    methods: {
-      loadBooks() {
-        axios.get('http://localhost:3000/api/books/')
-          .then(response => {
-            this.books = response.data;
-            this.filteredBooks = this.books; // Inicializar libros filtrados con todos los libros
-          })
-          .catch(error => {
-            console.error('Hubo un error al cargar los libros:', error);
-            this.error = 'Hubo un problema con el servidor. Por favor, inténtalo más tarde o contacta a los desarrolladores.';
-          });
-      },
-      filterBooks() {
+    userRole() {
+      return this.$store.getters.userRole;
+    }
+  },
+  created() {
+    this.loadBooks();
+  },
+  methods: {
+  loadBooks() {
+    axios.get('http://localhost:3000/api/books/')
+      .then(response => {
+        this.books = response.data;
+        this.filteredBooks = this.books; // Inicializar libros filtrados con todos los libros
+      })
+      .catch(error => {
+        console.error('Hubo un error al cargar los libros:', error);
+        this.error = 'Hubo un problema con el servidor. Por favor, inténtalo más tarde o contacta a los desarrolladores.';
+      });
+  },
+  filterBooks() {
     if (this.searchQuery.trim() === '') {
       this.filteredBooks = this.books;
     } else {
@@ -223,13 +226,13 @@
       this.filteredBooks = this.books.filter(book => {
         switch (this.selectedFilter) {
           case 'title':
-            return book.title.toLowerCase().includes(query);
+            return book.title && book.title.toLowerCase().includes(query);
           case 'description':
-            return book.description.toLowerCase().includes(query);
+            return book.description && book.description.toLowerCase().includes(query);
           case 'category':
-            return book.category.toLowerCase().includes(query);
+            return book.category && book.category.toLowerCase().includes(query);
           case 'publisher':
-            return book.publisher.toLowerCase().includes(query);
+            return book.publisher && book.publisher.toLowerCase().includes(query);
           default:
             return false;
         }
@@ -237,232 +240,76 @@
     }
     this.currentPage = 1; // Resetear a la primera página al filtrar
   },
-      changePage(page) {
-        if (page > 0 && page <= this.totalPages) {
-          this.currentPage = page;
-        }
-      },
-      editBook(bookId) {
-        const book = this.books.find((b) => b.id === bookId);
-        if (book) {
-          this.editBookId = bookId;
-          this.editBookData = book;
-          import('bootstrap/dist/js/bootstrap.bundle.min.js').then(
-            (bootstrap) => {
-              const modal = new bootstrap.Modal(
-                document.getElementById('editTaskModal')
-              );
-              modal.show();
-            }
-          );
-        } else {
-          console.error('Book not found with ID:', bookId);
-          this.editBookData = null; // Asegúrate de manejar el caso donde no se encuentra el libro
-        }
-      },
-      openDeleteModal(bookId) {
-        this.bookIdToDelete = bookId;
-        this.showDeleteModal = true;
-      },
-      closeDeleteModal() {
-        this.showDeleteModal = false;
-        this.bookIdToDelete = null;
-      },
-      confirmDelete() {
-        axios.delete(`http://localhost:3000/api/books/${this.bookIdToDelete}`)
-          .then(response => {
-            this.books = this.books.filter(book => book.id !== this.bookIdToDelete);
-            this.filteredBooks = this.books;
-            this.closeDeleteModal();
-            alert('Libro eliminado con éxito.');
-          })
-          .catch(error => {
-            console.error('Hubo un error al eliminar el libro:', error);
-          });
-      },
-      generatePDF() {
-        const doc = new jsPDF();
-        doc.setFontSize(18);
-        doc.text('INVENTARIO LIBRERIA EL POETA', 14, 22);
-        doc.setFontSize(12);
-        doc.text(`Fecha de creación: ${this.createdDate}`, 14, 30);
-        doc.text(`Cantidad de libros: ${this.totalBooks}`, 14, 36);
-        doc.text(`Cantidad de stock: ${this.totalStock}`, 14, 42);
-        
-        const columns = [
-          { header: this.types.ID_INCREMENTAL, dataKey: 'id' },
-          { header: this.types.TITLE_LABEL, dataKey: 'title' },
-          { header: this.types.DESCRIPTION_LABEL, dataKey: 'description' },
-          { header: this.types.STOCK_LABEL, dataKey: 'stock' },
-          { header: this.types.STATUS_LABEL, dataKey: 'status' },
-        ];
-        const rows = this.filteredBooks.map((book) => ({
-          ...book,
-          status: book.status ? this.types.STATUS_COMPLETE : this.types.STATUS_NO_COMPLETE,
-        }));
-        doc.autoTable({
-          head: [columns.map(col => col.header)],
-          body: rows.map(row => columns.map(col => row[col.dataKey])),
-          startY: 50, // Starting after the text
-        });
-        doc.save('books.pdf');
-      },
+    changePage(page) {
+      if (page > 0 && page <= this.totalPages) {
+        this.currentPage = page;
+      }
     },
-  };
-  </script>
-
-
-
-
-
-
-
-
-<style scoped>
-@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
-@import 'bootstrap/dist/css/bootstrap.min.css';
-@import 'bootstrap-icons/font/bootstrap-icons.css';
-
-/* Estilos generales */
-body {
-  font-family: 'Roboto', sans-serif;
-}
-
-.container-fluid {
-  max-width: 100%;
-}
-
-.card-header {
-  background-color: #007bff;
-  color: #ffffff;
-  text-align: center;
-}
-
-.table {
-  border-collapse: collapse; /* Asegura que no haya espacio entre bordes */
-}
-
-.table thead th {
-  vertical-align: middle;
-  text-align: center;
-  padding: 12px;
-}
-
-.table tbody td {
-  vertical-align: middle;
-  text-align: center;
-  padding: 12px;
-}
-
-.table-responsive {
-  margin-bottom: 20px;
-}
-
-.pagination {
-  margin-top: 20px;
-}
-
-.page-link {
-  cursor: pointer;
-  outline: none !important;
-}
-
-.actions {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  height: 100%;
-  padding: 0;
-}
-
-.actions .btn {
-  flex: 1;
-  margin: 0 2px; /* Ajusta el margen según sea necesario */
-  height: 50px; /* Ajusta la altura según sea necesario */
-  padding: 2px 5px; /* Ajusta el padding para que los botones no se vean demasiado grandes */
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  font-size: 14px; /* Ajusta el tamaño de la fuente según sea necesario */
-}
-
-.actions .btn:first-child {
-  margin-left: 0;
-}
-
-.actions .btn:last-child {
-  margin-right: 0;
-}
-
-.bg-dark .table-dark thead th,
-.bg-dark .table-dark tbody td {
-  background-color: #343a40;
-  color: #ffffff;
-}
-
-.bg-dark .modal-content {
-  background-color: #343a40;
-  color: #ffffff;
-}
-
-.bg-light .table-light thead th,
-.bg-light .table-light tbody td {
-  background-color: #f8f9fa;
-}
-
-.bg-light .modal-content {
-  background-color: #ffffff;
-  color: #000000;
-}
-
-.bg-dark .pagination-dark .page-item .page-link {
-  background-color: #495057;
-  color: #ffffff;
-}
-
-.bg-dark .pagination-dark .page-item.active .page-link {
-  background-color: #007bff;
-  border-color: #007bff;
-  color: #ffffff;
-}
-
-.bg-light .pagination-light .page-item .page-link {
-  background-color: #ffffff;
-  color: #000000;
-}
-
-.bg-light .pagination-light .page-item.active .page-link {
-  background-color: #007bff;
-  border-color: #007bff;
-  color: #ffffff;
-}
-.text-success {
-  color: green !important;
-  border: 1px solid green;
-  padding: 2px 5px;
-  border-radius: 3px;
-}
-
-.text-danger {
-  color: red !important;
-  border: 1px solid red;
-  padding: 2px 5px;
-  border-radius: 3px;
-}
-.modal.show.d-block {
-  display: block;
-}
-
-
-.modal-header, .modal-footer {
-  border: none;
-}
-
-.modal-content.bg-dark {
-  background-color: #343a40;
-}
-
-.modal-content.bg-light {
-  background-color: #f8f9fa;
-}
-</style>
+    editBook(bookId) {
+      const book = this.books.find((b) => b.id === bookId);
+      if (book) {
+        this.editBookId = bookId;
+        this.editBookData = book;
+        import('bootstrap/dist/js/bootstrap.bundle.min.js').then(
+          (bootstrap) => {
+            const modal = new bootstrap.Modal(
+              document.getElementById('editTaskModal')
+            );
+            modal.show();
+          }
+        );
+      } else {
+        console.error('Book not found with ID:', bookId);
+        this.editBookData = null; // Asegúrate de manejar el caso donde no se encuentra el libro
+      }
+    },
+    openDeleteModal(bookId) {
+      this.bookIdToDelete = bookId;
+      this.showDeleteModal = true;
+    },
+    closeDeleteModal() {
+      this.showDeleteModal = false;
+      this.bookIdToDelete = null;
+    },
+    confirmDelete() {
+      axios.delete(`http://localhost:3000/api/books/${this.bookIdToDelete}`)
+        .then(response => {
+          this.books = this.books.filter(book => book.id !== this.bookIdToDelete);
+          this.filteredBooks = this.books;
+          this.closeDeleteModal();
+          alert('Libro eliminado con éxito.');
+        })
+        .catch(error => {
+          console.error('Hubo un error al eliminar el libro:', error);
+        });
+    },
+    generatePDF() {
+      const doc = new jsPDF();
+      doc.setFontSize(18);
+      doc.text('INVENTARIO LIBRERIA EL POETA', 14, 22);
+      doc.setFontSize(12);
+      doc.text(`Fecha de creación: ${this.createdDate}`, 14, 30);
+      doc.text(`Cantidad de libros: ${this.totalBooks}`, 14, 36);
+      doc.text(`Cantidad de stock: ${this.totalStock}`, 14, 42);
+      
+      const columns = [
+        { header: this.types.ID_INCREMENTAL, dataKey: 'id' },
+        { header: this.types.TITLE_LABEL, dataKey: 'title' },
+        { header: this.types.DESCRIPTION_LABEL, dataKey: 'description' },
+        { header: this.types.STOCK_LABEL, dataKey: 'stock' },
+        { header: this.types.STATUS_LABEL, dataKey: 'status' },
+      ];
+      const rows = this.filteredBooks.map((book) => ({
+        ...book,
+        status: book.status ? this.types.STATUS_COMPLETE : this.types.STATUS_NO_COMPLETE,
+      }));
+      doc.autoTable({
+        head: [columns.map(col => col.header)],
+        body: rows.map(row => columns.map(col => row[col.dataKey])),
+        startY: 50, // Starting after the text
+      });
+      doc.save('books.pdf');
+    },
+  },
+};
+</script>
