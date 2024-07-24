@@ -26,6 +26,7 @@
           <ul class="list-group recent-movements">
             <li v-for="movement in movements" :key="movement.id" class="list-group-item">
               <div class="movement-info">
+                <div><strong>Libro:</strong> {{ movement.title }}</div>
                 <div><strong>Origen:</strong> {{ movement.fromCity }}</div>
                 <div><strong>Destino:</strong> {{ movement.toCity }}</div>
                 <div><strong>Stock Movido:</strong> {{ movement.stock }}</div>
