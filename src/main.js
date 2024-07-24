@@ -23,5 +23,5 @@ axios.interceptors.request.use(config => {
 const app = createApp(App)
 app.use(VueAxios, axios)
 app.use(router)
-
+app.use(store)
 app.mount('#app');

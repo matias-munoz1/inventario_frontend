@@ -75,7 +75,7 @@ export default {
       }
 
       try {
-        await this.login(this.form);
+        await this.$store.dispatch('login', this.form);  // Cambia mapActions a usar dispatch directamente
         alert('Bienvenido!');
         this.$router.push({ path: '/TaskList' });  // Asegúrate de que esta ruta exista
       } catch (error) {
