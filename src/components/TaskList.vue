@@ -10,7 +10,6 @@
         ]"
       >
         <h2 class="mb-0">{{ types.TASK_LIST_TITLE }}</h2>
-        
       </div>
       <div
         :class="[
@@ -48,6 +47,8 @@
                   <th scope="col">{{ types.ID_INCREMENTAL }}</th>
                   <th scope="col">{{ types.TITLE_LABEL }}</th>
                   <th scope="col">{{ types.DESCRIPTION_LABEL }}</th>
+                  <th scope="col">Categoría</th>
+                  <th scope="col">Editorial</th>
                   <th scope="col">{{ types.STATUS_LABEL }}</th>
                   <th scope="col">{{ types.STOCK_LABEL }}</th>
                   <th scope="col">{{ types.ACTIONS_LABEL }}</th>
@@ -61,10 +62,10 @@
                   <td>{{ book.category }}</td>
                   <td>{{ book.publisher }}</td>
                   <td>
-                    <span :class="book.status ? 'badge bg-success' : 'badge bg-danger'">
-                      {{ book.status ? 'Inventario completo' : 'Inventario pendiente' }}
-                    </span>
-                  </td>
+  <span :class="book.status ? 'badge bg-success' : 'badge bg-danger'">
+    {{ book.status ? 'Inventario completo' : 'Inventario pendiente' }}
+  </span>
+</td>
                   <td>{{ book.stock }}</td>
                   <td v-if="userRole !== 'viewer'" class="actions">
                     <button @click="editBook(book.id)" class="btn btn-warning btn-sm">
@@ -147,7 +148,8 @@
       </button>
     </div>  
   </div>
-  </template>
+</template>
+
   
   <script>
   import axios from 'axios';
@@ -171,6 +173,7 @@
         books: [],
         searchQuery: '',
         filteredBooks: [],
+        selectedFilter: 'title',
         error: null,
         editBookId: null,
         editBookData: null,
@@ -213,17 +216,27 @@
           });
       },
       filterBooks() {
-        if (this.searchQuery.trim() === '') {
-          this.filteredBooks = this.books;
-        } else {
-          const query = this.searchQuery.trim().toLowerCase();
-          this.filteredBooks = this.books.filter(book => 
-            book.title.toLowerCase().includes(query) ||
-            book.description.toLowerCase().includes(query)
-          );
+    if (this.searchQuery.trim() === '') {
+      this.filteredBooks = this.books;
+    } else {
+      const query = this.searchQuery.trim().toLowerCase();
+      this.filteredBooks = this.books.filter(book => {
+        switch (this.selectedFilter) {
+          case 'title':
+            return book.title.toLowerCase().includes(query);
+          case 'description':
+            return book.description.toLowerCase().includes(query);
+          case 'category':
+            return book.category.toLowerCase().includes(query);
+          case 'publisher':
+            return book.publisher.toLowerCase().includes(query);
+          default:
+            return false;
         }
-        this.currentPage = 1; // Resetear a la primera página al filtrar
-      },
+      });
+    }
+    this.currentPage = 1; // Resetear a la primera página al filtrar
+  },
       changePage(page) {
         if (page > 0 && page <= this.totalPages) {
           this.currentPage = page;
