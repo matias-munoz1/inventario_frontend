@@ -1,171 +1,198 @@
 <template>
-    <div
-      class="container d-flex justify-content-center align-items-center vh-100"
-      :class="isDarkTheme ? 'dark-theme' : 'light-theme'"
-    >
-      <div class="card shadow-lg p-4" :class="isDarkTheme ? 'bg-dark text-white' : 'bg-light text-dark'">
-        <h1 class="display-4 mb-4">{{ types.ADD_NEW_BOOK }}</h1>
-        <form
-          @submit.prevent="showConfirmationModal"
-          class="needs-validation"
-          novalidate
-        >
-          <div class="mb-3">
-            <label for="title" class="form-label">{{ types.TITLE_LABEL }}</label>
-            <input
-              type="text"
-              class="form-control"
-              id="title"
-              v-model="title"
-              required
-            />
-            <div class="invalid-feedback">
-              {{ types.PLEASE_ENTER_TITLE }}
+  <div
+    class="container d-flex justify-content-center align-items-center vh-100"
+    :class="isDarkTheme ? 'dark-theme' : 'light-theme'"
+  >
+    <div class="card shadow-lg p-4" :class="isDarkTheme ? 'bg-dark text-white' : 'bg-light text-dark'">
+      <h1 class="display-4 mb-4">{{ types.ADD_NEW_BOOK }}</h1>
+      <form
+        @submit.prevent="showConfirmationModal"
+        class="needs-validation"
+        novalidate
+      >
+        <div class="mb-3">
+          <label for="title" class="form-label">{{ types.TITLE_LABEL }}</label>
+          <input
+            type="text"
+            class="form-control"
+            id="title"
+            v-model="title"
+            required
+          />
+          <div class="invalid-feedback">
+            {{ types.PLEASE_ENTER_TITLE }}
+          </div>
+        </div>
+        <div class="mb-3">
+          <label for="description" class="form-label">{{ types.DESCRIPTION_LABEL }}</label>
+          <textarea
+            class="form-control"
+            id="description"
+            v-model="description"
+            required
+            rows="3"
+          ></textarea>
+          <div class="invalid-feedback">
+            {{ types.PLEASE_ENTER_DESCRIPTION }}
+          </div>
+        </div>
+        <div class="mb-3">
+          <label for="category" class="form-label">Categoría</label>
+          <input
+            type="text"
+            class="form-control"
+            id="category"
+            v-model="category"
+            required
+          />
+          <div class="invalid-feedback">
+            Por favor, ingresa la categoría.
+          </div>
+        </div>
+        <div class="mb-3">
+          <label for="publisher" class="form-label">Editorial</label>
+          <input
+            type="text"
+            class="form-control"
+            id="publisher"
+            v-model="publisher"
+            required
+          />
+          <div class="invalid-feedback">
+            Por favor, ingresa la editorial.
+          </div>
+        </div>
+        <div class="mb-3">
+          <label for="stock" class="form-label">{{ types.STOCK_LABEL }}</label>
+          <input
+            type="number"
+            class="form-control"
+            id="stock"
+            v-model="stock"
+            required
+          />
+          <div class="invalid-feedback">
+            {{ types.PLEASE_ENTER_STOCK }}
+          </div>
+        </div>
+        <div class="form-check mb-3">
+          <input
+            type="checkbox"
+            class="form-check-input"
+            id="status"
+            v-model="status"
+          />
+          <label class="form-check-label" for="status">{{ types.COMPLETE }}</label>
+        </div>
+        <button type="submit" class="btn btn-primary w-100">{{ types.ADD }}</button>
+      </form>
+
+      <!-- Modal de Confirmación -->
+      <div
+        class="modal fade"
+        id="confirmationModal"
+        tabindex="-1"
+        aria-labelledby="confirmationModalLabel"
+        aria-hidden="true"
+        ref="confirmationModal"
+      >
+        <div class="modal-dialog">
+          <div
+            :class="[
+              'modal-content',
+              isDarkTheme ? 'bg-dark text-white' : 'bg-light text-dark',
+            ]"
+          >
+            <div class="modal-header">
+              <h5 class="modal-title" id="confirmationModalLabel">
+                {{ types.CONFIRM }}
+              </h5>
+              <button
+                type="button"
+                class="btn-close"
+                data-bs-dismiss="modal"
+                aria-label="Close"
+              ></button>
             </div>
-          </div>
-          <div class="mb-3">
-            <label for="description" class="form-label">{{
-              types.DESCRIPTION_LABEL
-            }}</label>
-            <textarea
-              class="form-control"
-              id="description"
-              v-model="description"
-              required
-              rows="3"
-            ></textarea>
-            <div class="invalid-feedback">
-              {{ types.PLEASE_ENTER_DESCRIPTION }}
+            <div class="modal-body">
+              {{ types.CONFIRMATION_ADD_BOOK }}
             </div>
-          </div>
-          <div class="mb-3">
-            <label for="stock" class="form-label">{{ types.STOCK_LABEL }}</label>
-            <input
-              type="number"
-              class="form-control"
-              id="stock"
-              v-model="stock"
-              required
-            />
-            <div class="invalid-feedback">
-              {{ types.PLEASE_ENTER_STOCK }}
-            </div>
-          </div>
-          <div class="form-check mb-3">
-            <input
-              type="checkbox"
-              class="form-check-input"
-              id="status"
-              v-model="status"
-            />
-            <label class="form-check-label" for="status">{{
-              types.COMPLETE
-            }}</label>
-          </div>
-          <button type="submit" class="btn btn-primary w-100">{{ types.ADD }}</button>
-        </form>
-  
-        <!-- Modal de Confirmación -->
-        <div
-          class="modal fade"
-          id="confirmationModal"
-          tabindex="-1"
-          aria-labelledby="confirmationModalLabel"
-          aria-hidden="true"
-          ref="confirmationModal"
-        >
-          <div class="modal-dialog">
-            <div
-              :class="[
-                'modal-content',
-                isDarkTheme ? 'bg-dark text-white' : 'bg-light text-dark',
-              ]"
-            >
-              <div class="modal-header">
-                <h5 class="modal-title" id="confirmationModalLabel">
-                  {{ types.CONFIRM }}
-                </h5>
-                <button
-                  type="button"
-                  class="btn-close"
-                  data-bs-dismiss="modal"
-                  aria-label="Close"
-                ></button>
-              </div>
-              <div class="modal-body">
-                {{ types.CONFIRMATION_ADD_BOOK }}
-              </div>
-              <div class="modal-footer">
-                <button
-                  type="button"
-                  class="btn btn-secondary"
-                  data-bs-dismiss="modal"
-                >
-                  {{ types.CANCEL_BUTTON }}
-                </button>
-                <button
-                  type="button"
-                  class="btn btn-primary"
-                  @click="confirmAddBook"
-                >
-                  {{ types.CONFIRM_BUTTON }}
-                </button>
-              </div>
+            <div class="modal-footer">
+              <button
+                type="button"
+                class="btn btn-secondary"
+                data-bs-dismiss="modal"
+              >
+                {{ types.CANCEL_BUTTON }}
+              </button>
+              <button
+                type="button"
+                class="btn btn-primary"
+                @click="confirmAddBook"
+              >
+                {{ types.CONFIRM_BUTTON }}
+              </button>
             </div>
           </div>
         </div>
       </div>
     </div>
-  </template>
+  </div>
+</template>
   
-  <script>
-  import axios from 'axios'
-  import { Modal } from 'bootstrap/dist/js/bootstrap.bundle.min.js'
-  import types from '../types.js'
-  
-  export default {
-    name: 'AddBook',
-    props: {
-      isDarkTheme: Boolean,
-    },
-    data() {
-      return {
-        types,
-        title: '',
-        description: '',
-        stock: 0,
-        status: false,
+<script>
+import axios from 'axios';
+import { Modal } from 'bootstrap/dist/js/bootstrap.bundle.min.js';
+import types from '../types.js';
+
+export default {
+  name: 'AddBook',
+  props: {
+    isDarkTheme: Boolean,
+  },
+  data() {
+    return {
+      types,
+      title: '',
+      description: '',
+      category: '',
+      publisher: '',
+      stock: 0,
+      status: false,
+    };
+  },
+  methods: {
+    showConfirmationModal() {
+      const form = this.$el.querySelector('form');
+      if (form.checkValidity()) {
+        const modal = new Modal(this.$refs.confirmationModal);
+        modal.show();
+      } else {
+        form.classList.add('was-validated');
       }
     },
-    methods: {
-  showConfirmationModal() {
-    const form = this.$el.querySelector('form');
-    if (form.checkValidity()) {
-      const modal = new Modal(this.$refs.confirmationModal);
-      modal.show();
-    } else {
-      form.classList.add('was-validated');
-    }
+    async confirmAddBook() {
+      try {
+        const book = {
+          title: this.title,
+          description: this.description,
+          category: this.category,
+          publisher: this.publisher,
+          stock: this.stock,
+          status: this.status,
+        };
+        console.log('Book to be added:', book); // Agrega esta línea para depuración
+        await axios.post('http://localhost:3000/api/books/', book);
+        const modal = Modal.getInstance(this.$refs.confirmationModal);
+        modal.hide();
+        this.$router.push('/');
+      } catch (error) {
+        console.error('Error adding book:', error.response ? error.response.data : error.message); // Modifica para mostrar más detalles del error
+      }
+    },
   },
-  async confirmAddBook() {
-    try {
-      const book = {
-        title: this.title,
-        description: this.description,
-        stock: this.stock,
-        status: this.status,
-      };
-      console.log('Book to be added:', book); // Agrega esta línea para depuración
-      await axios.post('http://localhost:3000/api/books/', book);
-      const modal = Modal.getInstance(this.$refs.confirmationModal);
-      modal.hide();
-      this.$router.push('/');
-    } catch (error) {
-      console.error('Error adding book:', error.response ? error.response.data : error.message); // Modifica para mostrar más detalles del error
-    }
-  },
-}}
-  </script>
+};
+</script>
   
   <style scoped>
   @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap');

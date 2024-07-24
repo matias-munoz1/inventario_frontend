@@ -23,6 +23,24 @@
           ></textarea>
         </div>
         <div class="form-group">
+          <label for="category">Categoría</label>
+          <input
+            type="text"
+            v-model="task.category"
+            class="form-control"
+            id="category"
+          />
+        </div>
+        <div class="form-group">
+          <label for="publisher">Editorial</label>
+          <input
+            type="text"
+            v-model="task.publisher"
+            class="form-control"
+            id="publisher"
+          />
+        </div>
+        <div class="form-group">
           <label for="status">{{ types.STATUS_LABEL }}</label>
           <select v-model="task.status" class="form-control" id="status">
             <option :value="true">{{ types.COMPLETE }}</option>
@@ -87,7 +105,6 @@
     </div>
   </div>
 </template>
-
 <script>
 import axios from 'axios'
 import { Modal } from 'bootstrap'
@@ -142,8 +159,8 @@ export default {
     },
   },
 }
-
 </script>
+
 
 <style scoped>
 /* Tus estilos aquí */
